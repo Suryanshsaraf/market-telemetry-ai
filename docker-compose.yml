@@ -170,15 +170,11 @@ services:
       - webapp
     networks:
       - stock-network
-
-networks:
-  stock-network:
-    driver: bridge
-
+      
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
@@ -192,7 +188,7 @@ networks:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "3005:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
@@ -213,3 +209,7 @@ networks:
     depends_on:
       redis:
         condition: service_healthy
+
+networks:
+  stock-network:
+    driver: bridge
