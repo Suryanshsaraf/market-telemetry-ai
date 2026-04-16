@@ -1,103 +1,53 @@
-# 🧠 AI-Powered Real-Time Stock Alert System
+# Real-Time Stock Alerting & Analytics Platform 📈
 
-An enterprise-grade, event-driven microservices platform designed for high-frequency stock monitoring, powered by Machine Learning for real-time anomaly detection.
+An enterprise-grade, event-driven microservices architecture built to ingest, process, and visualize high-frequency stock market data in real-time. 
 
-## 🌟 Overview
+## 🚀 Overview & Architecture
 
-This system monitors financial assets in real-time and pipelines pricing data through Apache Kafka. Intelligent consumers evaluate tick data using Z-Score statistical anomaly detection while concurrently evaluating personalized user thresholds (MA crossovers, percentage spikes, etc.).
+This project was built to address the core challenges of streaming data pipelines at scale. Instead of relying on a standard monolithic CRUD architecture, this platform utilizes a **decoupled, asynchronous event-driven design**:
 
-### 🚀 Key Features
-- **AI Anomaly Detection**: Unsupervised Z-Score evaluation over a lightweight Redis sliding window.
-- **Dual Telemetry Dashboards**: 
-  - *Vanilla JS Premium UI*: Low-latency WebSocket/SSE client for end-user threshold configuration.
-  - *Streamlit Analytics App*: Real-time live chart rendering and anomaly surveillance feed.
-- **Microservices & Kafka**: Highly horizontally scalable architecture.
-- **SMTP Notification Dispatcher**: Abstracted provider system built to easily plugin SMS or Push.
-
----
-
-## 🏗️ Architecture
-
-```text
-┌──────────────────────────────────────────────────────────────┐
-│                    CLIENT LAYER (10k+ Users)                 │
-│  [Vanilla JS Premium Dashboard]      [Streamlit Analytics]   │
-│  * SSE/WebSocket Streams             * Direct Redis Polling  │
-└────────────────────────┬─────────────────────┬───────────────┘
-                         │                     │
-                         ↓                     ↓
-┌────────────────────────────────────────────────────────────┐
-│                    FASTAPI GATEWAY                         │
-│  - Clean Router Architecture (Alerts + Streams)            │
-│  - Middleware: Rate Limiting & Structured Logging          │
-│  - Pydantic Validation & Security                          │
-└───────────┬────────────────────┬───────────────────────────┘
-            │                    │
-            ↓                    ↓
-┌──────────────────────┐  ┌──────────────────────────────────┐
-│   REDIS (State Store)│  │    KAFKA MESSAGE BROKER          │
-│   ├─ Sliding Windows │  │    ├─ topic: stock-prices        │
-│   ├─ Config/Tokens   │  │    └─ topic: alerts              │
-└───────────┬──────────┘  └──────────┬───────────────────────┘
-            │                        │
-            ↓                        ↓
-┌─────────────────────┐      ┌─────────────────────────────┐
-│  AI CONSUMER NODE   │──────│  NOTIFIER DISPATCHER        │
-│  - ml_model.py      │      │  - SMTPProvider (email)     │
-│  - advanced_logic.py│      │  - Abstract Base Classes    │
-└─────────────────────┘      └─────────────────────────────┘
-```
-
----
+1. **Market High-Frequency Ingestion**: Background producers pull point-in-time stock prices and push them into **Apache Kafka** topics under high throughput.
+2. **Asynchronous Processing**: Python consumers continuously poll Kafka to aggregate ticks, evaluate logic algorithms, and publish active states into **Redis** for sub-millisecond retrieval.
+3. **API & Streaming**: A high-performance **FastAPI** backend subscribes to the event bus and streams real-time data to clients using **Server-Sent Events (SSE)**.
+4. **Client-Side Rendering**: A modern **Next.js** frontend receives the stream, aggregates point-in-time ticks into OHLC candlesticks live in the browser, and renders them onto a TradingView-style dark mode terminal.
 
 ## 🛠️ Technology Stack
-- **Backend Core**: Python 3.11, FastAPI, Pydantic
-- **Message Broker**: Confluent Kafka (KRaft Mode)
-- **State/Caching**: Redis 7
-- **Machine Learning**: NumPy, Pandas
-- **UI/UX**: HTML5, Vanilla JS, CSS Grid, Streamlit
-- **DevOps**: Docker, Docker Compose (Multi-stage slim/alpine builds)
 
----
+| Layer | Technologies |
+| --- | --- |
+| **Frontend** | `Next.js` (React), `TailwindCSS`, `Lightweight-Charts` |
+| **Backend API** | `FastAPI`, `Python 3.11`, `Uvicorn` |
+| **Message Broker** | `Apache Kafka` |
+| **Caching Layer** | `Redis` |
+| **Database** | `PostgreSQL` |
+| **DevOps & Infrastructure**| `Docker Compose`, `Nginx` |
+| **Observability/Monitoring**| `Prometheus`, `Grafana`, `Kafdrop` |
+| **Load Testing** | `Locust`, `Apache Bench` |
 
-## 🚀 Setup & Deployment
+## 📊 System Observability (DevOps)
+The system is heavily instrumented for production-readiness. `prometheus-fastapi-instrumentator` natively tracks HTTP requests across the API, which are scraped by **Prometheus** every 10 seconds. 
+A **Grafana** dashboard is provisioned out-of-the-box (`localhost:3005`) to visually monitor throughput, latency mappings, and status codes. The architecture easily handles stress loads (demonstrated successfully at 120,000+ requests).
 
-### Prerequisites
-- Docker Engine & Docker Compose
-- Port availability: `80` (Nginx), `8000` (FastAPI), `8501` (Streamlit), `9092` (Kafka)
+## ⚡ Quick Start
 
-### Quick Start
+The entire micro-architecture is portable and runs deterministically inside containers.
 
 1. **Clone the repository:**
    ```bash
-   git clone <repo-url>
-   cd ai-stock-alerts
+   git clone https://github.com/Suryanshsaraf/market-telemetry-ai.git
+   cd market-telemetry-ai
    ```
 
-2. **Configure Environment Variables:**
-   For email alerts, configure SMTP in `docker-compose.yml` under the `notifier` service.
-   ```yaml
-   SMTP_USER: "your-email@gmail.com"
-   SMTP_PASS: "your-app-password"
-   ```
-
-3. **Deploy the Cluster:**
+2. **Spin up the cluster:**
    ```bash
    docker-compose up -d --build
    ```
 
-4. **Access the Application:**
-   - **User Dashboard (FastAPI/Nginx)**: `http://localhost:80`
-   - **AI Analytics (Streamlit)**: `http://localhost:8501`
-   - **Kafka Management (Kafdrop)**: `http://localhost:9000`
+3. **Access the Interfaces:**
+   - **Trading Terminal (Frontend)**: `http://localhost:3001`
+   - **Backend API Docs**: `http://localhost:8000/docs`
+   - **Grafana Monitoring**: `http://localhost:3005` *(admin/admin)*
+   - **Kafdrop (Kafka UI)**: `http://localhost:9000`
 
 ---
-
-## 💻 Code Quality & Structure
-The system enforces strict Clean Architecture principles:
-- **`webapp/core/`**: Middlewares, State management, DB singletons.
-- **`webapp/routers/`**: Pydantic-validated endpoint definitions.
-- **`consumer/ml_model.py`**: Isolated Numpy-based statistical processing isolated from network I/O.
-- **Multi-Stage Builds**: Docker images are heavily optimized down to runtime binaries.
-
-> "A scalable backbone meets intelligent evaluation."
+*Built to showcase modern Data Engineering, DevOps, and Full-Stack capability.*

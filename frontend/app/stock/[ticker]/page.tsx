@@ -4,9 +4,11 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Star, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import PriceChart from '@/components/PriceChart';
+import TradingChart from '@/components/TradingChart';
 import AlertForm from '@/components/AlertForm';
 import AlertList from '@/components/AlertList';
+import TechnicalGauge from '@/components/TechnicalGauge';
+import FinancialsWidget from '@/components/FinancialsWidget';
 import NotificationToast from '@/components/NotificationToast';
 import { useSSEPrices } from '@/hooks/useSSEPrices';
 import { useSSEAlerts } from '@/hooks/useSSEAlerts';
@@ -104,18 +106,32 @@ export default function StockDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chart */}
-          <div className="lg:col-span-2">
-            <PriceChart history={stock?.history || []} height={400} />
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="flex-1 min-h-[600px]">
+              <TradingChart history={stock?.history || []} height={600} />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AlertForm
+                tickers={Object.keys(stocks)}
+                defaultTicker={ticker}
+                onAlertCreated={() => setAlertRefreshKey((k) => k + 1)}
+              />
+              <AlertList refreshKey={alertRefreshKey} />
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <AlertForm
-              tickers={Object.keys(stocks)}
-              defaultTicker={ticker}
-              onAlertCreated={() => setAlertRefreshKey((k) => k + 1)}
-            />
-            <AlertList refreshKey={alertRefreshKey} />
+            <button
+               onClick={() => toggleWatchlist(ticker)}
+               className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isWatchlisted ? 'bg-warning/20 text-warning border border-warning/50' : 'bg-[#eab308] text-black hover:bg-[#ca8a04]'}`}
+            >
+               <Star className="w-5 h-5" fill={isWatchlisted ? 'currentColor' : 'none'} />
+               {isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
+            </button>
+            <TechnicalGauge percentChange={stock?.percentChange || 0} />
+            <FinancialsWidget ticker={ticker} />
           </div>
         </div>
       </main>

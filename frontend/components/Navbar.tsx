@@ -43,7 +43,11 @@ export default function Navbar({ connected, alertCount = 0 }: NavbarProps) {
 
             {/* Alert Bell */}
             <div className="relative">
-              <button className="p-2 rounded-lg hover:bg-surface-light transition-colors text-text-secondary hover:text-text-primary">
+              <button 
+                className="p-2 rounded-lg hover:bg-surface-light transition-colors text-text-secondary hover:text-text-primary"
+                onClick={() => alert(`You have ${alertCount} alerts recently triggered.`)}
+                title="View Alerts"
+              >
                 <Bell className="w-5 h-5" />
               </button>
               {alertCount > 0 && (
@@ -53,10 +57,16 @@ export default function Navbar({ connected, alertCount = 0 }: NavbarProps) {
               )}
             </div>
 
-            {/* Activity */}
-            <button className="p-2 rounded-lg hover:bg-surface-light transition-colors text-text-secondary hover:text-text-primary">
+            {/* Activity (Grafana Dashboard) */}
+            <a 
+              href="http://localhost:3005" 
+              target="_blank"
+              rel="noopener noreferrer"
+              title="System Monitoring (Grafana)"
+              className="p-2 rounded-lg hover:bg-surface-light transition-colors text-text-secondary hover:text-text-primary"
+            >
               <Activity className="w-5 h-5" />
-            </button>
+            </a>
           </div>
         </div>
       </div>
