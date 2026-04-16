@@ -13,12 +13,16 @@ from webapp.core.middleware import log_requests_middleware, rate_limit_middlewar
 from webapp.core.state import price_broadcaster, alert_broadcaster, Broadcaster
 from webapp.routers import alerts, streams
 from webapp.schemas import HealthResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="AI-Powered Stock Alert Dashboard")
 
 # Middlewares
 app.middleware("http")(rate_limit_middleware)
 app.middleware("http")(log_requests_middleware)
+
+# Instrument Prometheus
+Instrumentator().instrument(app).expose(app)
 
 # Routers
 app.include_router(alerts.router)
