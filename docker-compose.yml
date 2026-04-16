@@ -120,18 +120,15 @@ services:
     networks:
       - stock-network
 
-  streamlit:
-    build: ./streamlit
+  frontend:
+    build: ./frontend
     ports:
-      - "8501:8501"
+      - "3001:3000"
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
-      redis:
-        condition: service_healthy
       webapp:
-        condition: service_started
+        condition: service_healthy
     networks:
       - stock-network
 

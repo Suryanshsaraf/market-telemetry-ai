@@ -6,10 +6,12 @@ from webapp.core.db import redis_client
 
 router = APIRouter(prefix="/api", tags=["Alerts"])
 
-def get_user_id(user_id: str = Cookie(None)):
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing user_id cookie")
-    return user_id
+def get_user_id(user_id: str = Cookie(None), q_user_id: str = None):
+    # Fallback to query param if cookie is missing (useful for Next.js frontend)
+    uid = user_id or q_user_id
+    if not uid:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    return uid
 
 @router.post("/set-alert", response_model=AlertResponse)
 async def set_alert(alert: AlertCreate, user_id: str = Depends(get_user_id)):

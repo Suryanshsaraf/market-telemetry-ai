@@ -37,9 +37,10 @@ async def stream_prices(request: Request):
     return StreamingResponse(event_gen(), media_type="text/event-stream")
 
 @router.get("/stream-alerts")
-async def stream_alerts(request: Request, user_id: str = Cookie(None)):
-    if not user_id:
-        return {"error": "No user_id cookie"} # Handled loosely for SSE connection
+async def stream_alerts(request: Request, user_id: str = Cookie(None), q_user_id: str = None):
+    uid = user_id or q_user_id
+    if not uid:
+        return {"error": "No user_id provided"} 
 
     client_q = await alert_broadcaster.register(max_queue_size=200)
 

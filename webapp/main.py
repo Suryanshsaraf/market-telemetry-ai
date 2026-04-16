@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
+from fastapi.middleware.cors import CORSMiddleware
 from webapp.core.middleware import log_requests_middleware, rate_limit_middleware
 from webapp.core.state import price_broadcaster, alert_broadcaster, Broadcaster
 from webapp.routers import alerts, streams
@@ -16,6 +17,15 @@ from webapp.schemas import HealthResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="AI-Powered Stock Alert Dashboard")
+
+# CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify ["http://localhost:3001", "http://frontend:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Middlewares
 app.middleware("http")(rate_limit_middleware)
