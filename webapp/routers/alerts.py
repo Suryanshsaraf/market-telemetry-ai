@@ -1,8 +1,8 @@
 import time
 import uuid
 from fastapi import APIRouter, Cookie, HTTPException, Depends
-from webapp.schemas import AlertCreate, AlertResponse, AlertDetails
-from webapp.core.db import redis_client
+from schemas import AlertCreate, AlertResponse, AlertDetails
+from core.db import redis_client
 
 router = APIRouter(prefix="/api", tags=["Alerts"])
 

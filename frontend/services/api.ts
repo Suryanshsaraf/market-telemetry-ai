@@ -1,7 +1,7 @@
 import { AlertCreate, Alert } from '@/types';
 import { generateUserId } from '@/utils/formatters';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 function getUserId(): string {
   return generateUserId();
@@ -9,7 +9,7 @@ function getUserId(): string {
 
 export async function setAlert(alert: AlertCreate): Promise<{ message: string; alert_id: string }> {
   const userId = getUserId();
-  const res = await fetch(`${API_BASE}/api/set-alert?user_id=${userId}`, {
+  const res = await fetch(`${API_BASE}/api/set-alert?q_user_id=${userId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(alert),
@@ -23,7 +23,7 @@ export async function setAlert(alert: AlertCreate): Promise<{ message: string; a
 
 export async function getAlerts(): Promise<Alert[]> {
   const userId = getUserId();
-  const res = await fetch(`${API_BASE}/api/get-alerts?user_id=${userId}`);
+  const res = await fetch(`${API_BASE}/api/get-alerts?q_user_id=${userId}`);
   if (!res.ok) throw new Error('Failed to fetch alerts');
   const data = await res.json();
   return data.alerts || [];
@@ -31,7 +31,7 @@ export async function getAlerts(): Promise<Alert[]> {
 
 export async function deleteAlert(alertId: string): Promise<void> {
   const userId = getUserId();
-  const res = await fetch(`${API_BASE}/api/delete-alert/${alertId}?user_id=${userId}`, {
+  const res = await fetch(`${API_BASE}/api/delete-alert/${alertId}?q_user_id=${userId}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('Failed to delete alert');
@@ -43,5 +43,5 @@ export function getSSEPricesUrl(): string {
 
 export function getSSEAlertsUrl(): string {
   const userId = getUserId();
-  return `${API_BASE}/api/stream-alerts?user_id=${userId}`;
+  return `${API_BASE}/api/stream-alerts?q_user_id=${userId}`;
 }

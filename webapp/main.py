@@ -10,10 +10,10 @@ from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
 from fastapi.middleware.cors import CORSMiddleware
-from webapp.core.middleware import log_requests_middleware, rate_limit_middleware
-from webapp.core.state import price_broadcaster, alert_broadcaster, Broadcaster
-from webapp.routers import alerts, streams
-from webapp.schemas import HealthResponse
+from core.middleware import log_requests_middleware, rate_limit_middleware
+from core.state import price_broadcaster, alert_broadcaster, Broadcaster
+from routers import alerts, streams
+from schemas import HealthResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="AI-Powered Stock Alert Dashboard")

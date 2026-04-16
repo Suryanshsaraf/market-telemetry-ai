@@ -3,7 +3,7 @@ import json
 import time
 from fastapi import APIRouter, Request, Cookie, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
-from webapp.core.state import price_broadcaster, alert_broadcaster
+from core.state import price_broadcaster, alert_broadcaster
 
 router = APIRouter(prefix="/api", tags=["Streams"])
 
