@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Alerts - Real-Time Stock Monitoring</title>
+    
+    <!-- Google Fonts: Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Sleek Dark Mode Palette */
+            --bg-base: #0f1115;
+            --bg-surface: #1a1d24;
+            --bg-surface-glass: rgba(26, 29, 36, 0.7);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            
+            --accent-primary: #3b82f6;
+            --accent-primary-hover: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            
+            --success-color: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --warning-color: #f59e0b;
+            
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-focus: rgba(59, 130, 246, 0.5);
+            
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.2);
+            
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+            background-attachment: fixed;
+        }
+        
+        /* Typography */
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+        
+        /* Header */
+        header {
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--bg-surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-family: 'Outfit';
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border-subtle);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .user-id-highlight {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'Outfit';
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 40px;
+            flex: 1;
+        }
+
+        /* Top Bar Info */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+        }
+
+        .dashboard-title h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-title p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-surface);
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition-smooth);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-muted);
+        }
+
+        .status-badge.connected .status-dot {
+            background-color: var(--success-color);
+            box-shadow: 0 0 10px var(--success-color);
+            animation: pulse-dot 2s infinite;
+        }
+
+        .status-badge.disconnected .status-dot {
+            background-color: var(--danger-color);
+            box-shadow: 0 0 10px var(--danger-color);
+        }
+
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panels Shared Settings */
+        .panel {
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-subtle);
+            padding: 24px;
+            box-shadow: var(--shadow-glass);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-align: left;
+            padding: 0 16px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        td {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.95rem;
+        }
+
+        tr td:first-child { border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); }
+        tr td:last-child { border-top-right-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+
+        tbody tr {
+            transition: var(--transition-fast);
+        }
+        
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .ticker { 
+            font-weight: 700; 
+            font-family: 'Outfit';
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+        
+        .company-name {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .price-container {
+            font-family: 'Outfit';
+            font-weight: 600;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-up { color: var(--success-color); animation: priceFlashUp 1s ease; }
+        .price-down { color: var(--danger-color); animation: priceFlashDown 1s ease; }
+
+        @keyframes priceFlashUp {
+            0% { color: var(--text-primary); text-shadow: 0 0 0 transparent; }
+            50% { color: var(--success-color); text-shadow: 0 0 15px var(--success-color); transform: scale(1.05); }
+            100% { color: var(--success-color); text-shadow: 0 0 0 transparent; }
+        }
+
+        @keyframes priceFlashDown {
+            0% { color: var(--text-primary); text-shadow: 0 0 0 transparent; }
+            50% { color: var(--danger-color); text-shadow: 0 0 15px var(--danger-color); transform: scale(1.05); }
+            100% { color: var(--danger-color); text-shadow: 0 0 0 transparent; }
+        }
+
+        /* Forms & Inputs */
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        input[type="number"], select {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: 'Inter';
+            font-size: 0.9rem;
+            transition: var(--transition-fast);
+            outline: none;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        input[type="number"] { width: 100px; }
+        
+        /* Hide arrows on number input for sleekness */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        button {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Inter';
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: var(--accent-primary-hover);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Active Alerts Section */
+        .alerts-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        
+        /* Custom Scrollbar */
+        .alerts-panel::-webkit-scrollbar { width: 6px; }
+        .alerts-panel::-webkit-scrollbar-track { background: transparent; }
+        .alerts-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .alerts-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        .alert-count {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .alert-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            transition: var(--transition-fast);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 3px;
+        }
+        
+        .alert-card.type-above::before { background-color: var(--success-color); }
+        .alert-card.type-below::before { background-color: var(--danger-color); }
+
+        .alert-card:hover {
+            transform: translateX(4px);
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-ticker-badge {
+            font-family: 'Outfit';
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .btn-delete {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .btn-delete svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .alert-condition {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        
+        .condition-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-above .condition-badge { background: var(--success-bg); color: var(--success-color); }
+        .type-below .condition-badge { background: var(--danger-bg); color: var(--danger-color); }
+
+        .alert-target-price {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'Outfit';
+        }
+
+        .no-alerts {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .no-alerts svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.2;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: var(--bg-surface-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            min-width: 320px;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toast::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--warning-color);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success::before { background: var(--success-color); }
+
+        .toast-icon {
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        .toast-content h4 {
+            color: var(--text-primary);
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .toast-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        #alertSound { display: none; }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- USER_ID_PLACEHOLDER -->
+    
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">A</div>
+            <div class="logo-text">Antigravity Alerts</div>
+        </div>
+        <div class="user-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Session: <span id="userIdDisplay" class="user-id-highlight">Loading...</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <h1>Market Overview</h1>
+                <p>Real-time telemetry and customized event triggers</p>
+            </div>
+            
+            <div id="status" class="status-badge disconnected">
+                <div class="status-dot"></div>
+                <span id="statusText">Connecting to data stream...</span>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Market Data Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Live Assets</div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Price</th>
+                                <th>Target Condition</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTable">
+                            <!-- Skeleton Loading Rows -->
+                            <tr><td colspan="4"><div class="skeleton" style="height: 48px; width: 100%;"></div></td></tr>
+                            <tr><td colspan="4"><div class="skeleton" style="height: 48px; width: 100%;"></div></td></tr>
+                            <tr><td colspan="4"><div class="skeleton" style="height: 48px; width: 100%;"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Active Alerts Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">Active Watchlist</div>
+                    <span class="alert-count" id="alertCount">0</span>
+                </div>
+                
+                <div class="alerts-panel" id="alertsList">
+                    <div class="no-alerts">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <p>No active alerts. Configure a threshold to begin monitoring.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <audio id="alertSound" preload="auto">
+        <!-- Subtler, modern pop/chime sound -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2W58ueeSwkO" type="audio/wav">
+    </audio>
+
+    <script>
+        const formatPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(price);
+        
+        let stocks = {};
+        let firstLoad = true;
+        let userId = window.USER_ID || 'unknown';
+        let activeAlerts = [];
+        
+        document.getElementById('userIdDisplay').textContent = userId.substring(0, 8);
+        
+        const priceStream = new EventSource('/api/stream-prices');
+        const alertStream = new EventSource('/api/stream-alerts');
+        const alertSound = document.getElementById('alertSound');
+        const statusBadge = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        
+        // Status Handling
+        priceStream.onopen = () => {
+            statusText.textContent = 'Stream Active';
+            statusBadge.className = 'status-badge connected';
+        };
+        
+        priceStream.onerror = () => {
+            statusText.textContent = 'Connection Interrupted';
+            statusBadge.className = 'status-badge disconnected';
+        };
+        
+        // Data Handling
+        priceStream.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            updateRow(data);
+        };
+        
+        alertStream.onmessage = (e) => {
+            const alertData = JSON.parse(e.data);
+            showToast('Target Reached', alertData.message, 'warning');
+            playAlertSound();
+            loadAlerts(); 
+        };
+        
+        function updateRow(data) {
+            if (firstLoad) {
+                document.getElementById('stockTable').innerHTML = '';
+                firstLoad = false;
+            }
+            
+            const { ticker, price, company } = data;
+            const rowId = `row-${ticker.replace(/[^a-zA-Z0-9]/g, '')}`;
+            let row = document.getElementById(rowId);
+            
+            if (!row) {
+                row = document.createElement('tr');
+                row.id = rowId;
+                
+                row.innerHTML = `
+                    <td>
+                        <span class="ticker">${ticker}</span>
+                        <span class="company-name">${company || 'Asset'}</span>
+                    </td>
+                    <td>
+                        <div class="price-container" id="price-wrapper-${rowId}">
+                            <span id="price-${rowId}">${formatPrice(price)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <select id="type-${rowId}">
+                                <option value="above">Runs Above ↑</option>
+                                <option value="below">Drops Below ↓</option>
+                            </select>
+                            <input type="number" id="thresh-${rowId}" placeholder="Price" step="0.01">
+                        </div>
+                    </td>
+                    <td>
+                        <button onclick="setAlert('${ticker}', '${rowId}')">Track</button>
+                    </td>
+                `;
+                document.getElementById('stockTable').appendChild(row);
+            } else {
+                const priceCell = document.getElementById(`price-${rowId}`);
+                const oldPriceText = priceCell.textContent.replace(/[^0-9.-]+/g, "");
+                const oldPrice = parseFloat(oldPriceText);
+                
+                priceCell.textContent = formatPrice(price);
+                
+                // Re-trigger animation by resetting class
+                if (price > oldPrice) {
+                    priceCell.className = '';
+                    void priceCell.offsetWidth; 
+                    priceCell.className = 'price-up';
+                } else if (price < oldPrice) {
+                    priceCell.className = '';
+                    void priceCell.offsetWidth;
+                    priceCell.className = 'price-down';
+                }
+            }
+            stocks[ticker] = data;
+        }
+        
+        async function setAlert(ticker, rowId) {
+            const thresholdInput = document.getElementById(`thresh-${rowId}`);
+            const threshold = thresholdInput.value;
+            const type = document.getElementById(`type-${rowId}`).value;
+            
+            if (!threshold) {
+                showToast('Input Required', 'Please explicitly set a target price.', 'error');
+                thresholdInput.focus();
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/set-alert', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ticker, threshold: parseFloat(threshold), type })
+                });
+                
+                const result = await res.json();
+                
+                if (res.ok) {
+                    showToast('Tracking Initiated', result.message, 'success');
+                    thresholdInput.value = '';
+                    loadAlerts();
+                } else {
+                    showToast('Error', result.error || 'Failed to set alert.', 'error');
+                }
+            } catch (err) {
+                showToast('Network Error', 'Could not communicate with the broker.', 'error');
+            }
+        }
+        
+        async function loadAlerts() {
+            try {
+                const res = await fetch('/api/get-alerts');
+                const data = await res.json();
+                activeAlerts = data.alerts || [];
+                
+                document.getElementById('alertCount').textContent = activeAlerts.length;
+                const alertsList = document.getElementById('alertsList');
+                
+                if (activeAlerts.length === 0) {
+                    alertsList.innerHTML = `
+                        <div class="no-alerts">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <p>No active alerts. Configure a threshold to begin monitoring.</p>
+                        </div>`;
+                } else {
+                    alertsList.innerHTML = activeAlerts.map(alert => `
+                        <div class="alert-card type-${alert.type}">
+                            <div class="alert-header">
+                                <span class="alert-ticker-badge">${alert.ticker}</span>
+                                <button class="btn-delete" onclick="deleteAlert('${alert.alert_id}')" title="Remove Alert">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="alert-condition">
+                                <span class="condition-badge">${alert.type}</span>
+                                <span>Target: <span class="alert-target-price">${formatPrice(alert.threshold)}</span></span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error loading alerts:', err);
+            }
+        }
+        
+        async function deleteAlert(alertId) {
+            try {
+                const res = await fetch(`/api/delete-alert/${alertId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadAlerts();
+                } else {
+                    showToast('Error', 'Could not remove alert.', 'error');
+                }
+            } catch (err) {
+                showToast('Network Error', 'Failed to communicate with broker.', 'error');
+            }
+        }
+        
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'success' : ''}`;
+            
+            let icon = '🔔';
+            if (type === 'success') icon = '✅';
+            if (type === 'warning') icon = '🚨';
+            if (type === 'error') icon = '❌';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div class="toast-content">
+                    <h4>${title}</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            requestAnimationFrame(() => toast.classList.add('show'));
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400); // 400ms transition time
+            }, 5000);
+            
+            if (type === 'warning' && Notification.permission === 'granted') {
+                new Notification(title, { body: message });
+            }
+        }
+        
+        function playAlertSound() {
+            alertSound.currentTime = 0;
+            alertSound.play().catch(() => {});
+        }
+        
+        // Initial load
+        loadAlerts();
+        setInterval(loadAlerts, 30000); // Guard poll
+        
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
